@@ -11,6 +11,7 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -22,6 +23,7 @@ public class MainManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -43,7 +45,7 @@ public class MainManager : MonoBehaviour
         if (!m_Started)
         {
             if (Input.GetKeyDown(KeyCode.Space))
-            {
+            {                
                 m_Started = true;
                 float randomDirection = Random.Range(-1.0f, 1.0f);
                 Vector3 forceDir = new Vector3(randomDirection, 1, 0);
@@ -51,6 +53,8 @@ public class MainManager : MonoBehaviour
 
                 Ball.transform.SetParent(null);
                 Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
+
+                UpdateBestScore();
             }
         }
         else if (m_GameOver)
@@ -58,7 +62,13 @@ public class MainManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene(0);
         }
     }
 
@@ -71,6 +81,21 @@ public class MainManager : MonoBehaviour
     public void GameOver()
     {
         m_GameOver = true;
+        UpdateBestScore();
         GameOverText.SetActive(true);
+    }
+
+    void UpdateBestScore()
+    {
+        if(DataManager.Instance != null)
+        {
+            if(DataManager.Instance.bestScore <= m_Points)
+            {
+                DataManager.Instance.bestScore = m_Points;
+                DataManager.Instance.bestPlayerName = DataManager.Instance.playerName;
+            }
+            BestScoreText.text = $"Best score: {DataManager.Instance.bestPlayerName}: {DataManager.Instance.bestScore}";
+        }
+
     }
 }
